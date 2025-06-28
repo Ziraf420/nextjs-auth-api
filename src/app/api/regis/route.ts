@@ -56,7 +56,10 @@ export async function POST(req: Request) {
         category = formData.get('category') as string;
       } catch (e) {
         console.error('Error parsing FormData:', e);
-        return NextResponse.json({ error: 'Format data tidak valid' }, { status: 400 });
+        return NextResponse.json({ 
+          statusCode: 400,
+          message: 'Format data tidak valid' 
+        }, { status: 400 });
       }
     }
 
@@ -64,15 +67,21 @@ export async function POST(req: Request) {
   
     if (!email || !password) {
       console.log('Error: Field email atau password kosong');
-      return NextResponse.json({ error: 'Field kosong' }, { status: 400 });
+      return NextResponse.json({ 
+        statusCode: 403,
+        message: 'Field email atau password kosong' 
+      }, { status: 403 });
     }
 
-  const [existing]: any = await db.query('SELECT * FROM users WHERE email = ?', [email]);
+    const [existing]: any = await db.query('SELECT * FROM users WHERE email = ?', [email]);
     console.log('Hasil cek email:', existing);
     
     if (existing.length > 0) {
       console.log('Error: Email sudah terdaftar');
-      return NextResponse.json({ error: 'Email sudah terdaftar' }, { status: 400 });
+      return NextResponse.json({ 
+        statusCode: 403,
+        message: 'Email sudah terdaftar' 
+      }, { status: 403 });
     }
 
     const hashed = await bcrypt.hash(password, 10);
@@ -85,9 +94,16 @@ export async function POST(req: Request) {
     const user = userRow[0];
     delete user.password;
 
-    return NextResponse.json({ message: 'Registrasi berhasil', user });
+    return NextResponse.json({ 
+      statusCode: 200,
+      message: 'Registrasi berhasil', 
+      user 
+    }, { status: 200 });
   } catch (error) {
     console.error('Error dalam proses registrasi:', error);
-    return NextResponse.json({ error: 'Terjadi kesalahan server' }, { status: 500 });
+    return NextResponse.json({ 
+      statusCode: 500,
+      message: 'Terjadi kesalahan server' 
+    }, { status: 500 });
   }
 }
